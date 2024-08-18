@@ -1,0 +1,10 @@
+[Unit]
+Description=Script que imprime un saludo y la fecha actual
+After=network.target
+
+[Service]
+ExecStart=/media/chris/DATA/USAC/2024/segundoSemestre2024/Sopes1/RepoSopesClase/actividad4/saludo_actividad4.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
