@@ -1,0 +1,42 @@
+# Completely Fair Scheduler (CFS) en Linux
+
+El **Completely Fair Scheduler (CFS)** es el algoritmo de planificación de procesos por defecto en el núcleo de Linux desde la versión 2.6.23. Está diseñado para ser más justo y eficiente que sus predecesores, y se basa en la teoría del "fair queuing" (planificación justa).
+
+## Características principales de CFS:
+
+1. **Justicia en la asignación de CPU**:
+   - El objetivo del CFS es distribuir el tiempo de CPU de manera justa entre todos los procesos en ejecución, de acuerdo con su "peso" o prioridad. Intenta asegurarse de que todos los procesos reciban una cantidad de tiempo proporcional a su prioridad.
+
+2. **Cola de procesos basada en árbol rojo-negro**:
+   - CFS utiliza una estructura de datos eficiente llamada árbol rojo-negro, un árbol binario auto-balanceado, donde los procesos se organizan según el tiempo que han consumido en la CPU. Este árbol permite que las operaciones de búsqueda, inserción y eliminación se realicen en tiempo logarítmico, lo que mejora la escalabilidad en sistemas con muchos procesos.
+
+3. **Métrica del tiempo virtual**:
+   - CFS asigna a cada proceso un "tiempo virtual" que representa cuánto tiempo ha estado ejecutándose en relación con otros procesos. Cuanto menos tiempo ha consumido un proceso, menor será su tiempo virtual. El CFS selecciona siempre el proceso con el menor tiempo virtual para ejecutarse a continuación.
+
+4. **No utiliza la idea de *time slices* fija**:
+   - A diferencia de los planificadores tradicionales que asignan un "time slice" o intervalo de tiempo fijo para cada proceso, CFS no tiene un intervalo predefinido. En su lugar, busca garantizar que cada proceso tenga acceso justo a la CPU según su prioridad y carga del sistema.
+
+5. **Soporte para prioridad mediante *nice* values**:
+   - El CFS tiene en cuenta el valor de "nice" de un proceso, que indica su prioridad relativa. Un proceso con un valor "nice" más bajo (mayor prioridad) obtiene más tiempo de CPU que uno con un valor "nice" más alto (menor prioridad).
+
+6. **Latencia mínima garantizada**:
+   - El CFS asegura que todos los procesos obtienen una oportunidad de ejecutar dentro de un periodo definido llamado "targeted latency". Si hay más procesos de los que caben en un solo intervalo de latencia, el CFS reduce proporcionalmente el tiempo que cada proceso pasa ejecutándose.
+
+7. **Eficiencia en sistemas multiprocesador**:
+   - En sistemas con múltiples procesadores o núcleos, el CFS también distribuye los procesos de manera eficiente entre ellos para aprovechar el paralelismo. Utiliza una estrategia de balanceo de carga para distribuir la carga de trabajo de forma equitativa entre los núcleos.
+
+## Funcionamiento del CFS:
+
+1. **Selección de procesos**:
+   - El CFS mantiene un árbol rojo-negro donde cada nodo es un proceso, y los nodos se ordenan por su tiempo virtual acumulado. El núcleo selecciona siempre el proceso con el menor tiempo virtual, que es el que ha usado menos CPU en relación con otros.
+
+2. **Actualización de tiempos**:
+   - A medida que un proceso se ejecuta, su tiempo de CPU utilizado se acumula en su tiempo virtual. Los procesos con menor tiempo virtual son los primeros en ser seleccionados para ejecutarse, y aquellos con mayor tiempo virtual tendrán que esperar hasta que los procesos menos ejecutados alcancen un uso de CPU comparable.
+
+3. **Asignación dinámica de CPU**:
+   - CFS ajusta dinámicamente el tiempo que cada proceso pasa en la CPU, de modo que si un proceso ha sido interrumpido o ha tenido poco tiempo en la CPU, será elegido antes para compensar. Si un proceso ha consumido mucho tiempo de CPU, tendrá que esperar más.
+
+4. **Incorporación de nuevos procesos**:
+   - Los nuevos procesos entran en el árbol con un tiempo virtual relativamente bajo, lo que les da una oportunidad inmediata de ejecutarse. A medida que se ejecutan, su tiempo virtual se incrementa.
+
+CFS de Linux es un planificador de CPU diseñado para ofrecer una distribución justa del tiempo de CPU entre los procesos, minimizando el *starvation* (hambre de procesos) y aprovechando estructuras de datos eficientes para lograr una buena escalabilidad.
